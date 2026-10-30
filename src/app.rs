@@ -2,14 +2,13 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
-use ratatui::buffer::Buffer as RBuf;
 use ratatui::layout::{Constraint, Direction, Layout, Position, Rect};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::widgets::{Block, Borders, Paragraph};
 use ratatui::Frame;
 
 use crate::buffer::Buffer;
-use crate::highlight::{char_width, highlight, lang_for, str_width, Tok};
+use crate::highlight::{highlight, lang_for, str_width, Tok};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Focus { Tree, Editor }
@@ -408,7 +407,7 @@ impl App {
         f.render_widget(block, area);
 
         let title = " 文件 ";
-        let _ = f.buffer_mut().set_stringn(area.x, area.y, title, area.width, Style::default().fg(Color::DarkGray).add_modifier(Modifier::BOLD));
+        let _ = f.buffer_mut().set_stringn(area.x, area.y, title, area.width as usize, Style::default().fg(Color::DarkGray).add_modifier(Modifier::BOLD));
 
         let visible = inner.height as usize;
         if visible == 0 { return; }
@@ -439,7 +438,7 @@ impl App {
             }
             let w = area.width as usize;
             text = text.chars().take(w).collect();
-            let _ = f.buffer_mut().set_stringn(inner.x, y, &text, inner.width, style);
+            let _ = f.buffer_mut().set_stringn(inner.x, y, &text, inner.width as usize, style);
         }
 
         // 光标位置
@@ -469,9 +468,9 @@ impl App {
             } else {
                 Style::default().fg(Color::DarkGray)
             };
-            let w = str_width(&label) as u16;
+            let w = str_width(&label);
             if tab_x + w > area.x + area.width { break; }
-            let _ = f.buffer_mut().set_stringn(tab_x, tab_y, &label, w, style);
+            let _ = f.buffer_mut().set_stringn(tab_x, tab_y, &label, w as usize, style);
             tab_x += w;
         }
 
@@ -504,7 +503,7 @@ impl App {
 
             // 行号
             let num = format!("{:>w$} ", ln + 1, w = numw as usize);
-            let _ = f.buffer_mut().set_stringn(area.x, y, &num, numw + 1, Style::default().fg(Color::DarkGray));
+            let _ = f.buffer_mut().set_stringn(area.x, y, &num, (numw + 1) as usize, Style::default().fg(Color::DarkGray));
 
             let line = &buf.lines[ln];
             let toks = highlight(line, lang.as_ref());
@@ -517,7 +516,7 @@ impl App {
                 while j < line.len() && toks[j] == tok { j += 1; }
                 let s: String = line[i..j].iter().collect();
                 let style = style_for(tok);
-                let (nx, _) = f.buffer_mut().set_stringn(x, y, &s, text_w - (x - text_x), style);
+                let (nx, _) = f.buffer_mut().set_stringn(x, y, &s, (text_w - (x - text_x)) as usize, style);
                 x = nx;
                 i = j;
             }
@@ -549,20 +548,20 @@ impl App {
                 &self.message
             };
             let total = str_width(&s) + str_width(right);
-            let pad = (area.width as usize).saturating_sub(total);
+            let pad = area.width.saturating_sub(total) as usize;
             s.push_str(&" ".repeat(pad));
             s.push_str(right);
             s
         } else {
             " termide | Ctrl+O 打开 Ctrl+N 新建 Ctrl+Q 退出 ".to_string()
         };
-        let _ = f.buffer_mut().set_stringn(area.x, area.y, &text, area.width, Style::default().bg(Color::Cyan).fg(Color::Black));
+        let _ = f.buffer_mut().set_stringn(area.x, area.y, &text, area.width as usize, Style::default().bg(Color::Cyan).fg(Color::Black));
     }
 
     fn render_prompt(&mut self, f: &mut Frame, area: Rect) {
         let Some(p) = self.prompt.as_ref() else { return };
         let s = format!("{}{}", p.label, p.input);
-        let _ = f.buffer_mut().set_stringn(area.x, area.y, &s, area.width, Style::default().bg(Color::Blue).fg(Color::White));
+        let _ = f.buffer_mut().set_stringn(area.x, area.y, &s, area.width as usize, Style::default().bg(Color::Blue).fg(Color::White));
         let cx = area.x + str_width(&p.label) + str_width(&p.input);
         f.set_cursor_position(Position::new(cx.min(area.x + area.width - 1), area.y));
     }
@@ -585,11 +584,4 @@ fn expand_path(s: &str) -> PathBuf {
         }
     }
     PathBuf::from(s)
-}
-
-// 让 Buffer 可以在编辑时被借用
-impl std::ops::IndexMut<usize> for App {
-    fn index_mut(&mut self, i: usize) -> &mut Self::Output {
-        &mut self.buffers[i]
-    }
 }
