@@ -10,8 +10,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      
+      # 1. 编译 Rust 二进制
       - run: cargo build --release
-      - run: cargo deb --no-build
+      
+      # 2. 安装打 deb 包的工具 (你补充的这步非常关键！)
+      - name: Install cargo-deb
+        run: cargo install cargo-deb --locked
+        
+      # 3. 执行打包
+      - name: Package .deb
+        run: cargo deb --no-build
+        
+      # 4. 上传产物
       - uses: actions/upload-artifact@v4
         with:
           name: termide-deb-ci
