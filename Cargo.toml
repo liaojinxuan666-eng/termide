@@ -1,0 +1,40 @@
+[package]
+name = "termide"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "A minimal terminal IDE written in Rust"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/yourname/termide"
+authors = ["Your Name <you@example.com>"]
+
+[[bin]]
+name = "termide"
+path = "src/main.rs"
+
+[dependencies]
+ratatui = "0.29"
+crossterm = { version = "0.28", features = ["event-stream"] }
+unicode-width = "0.2"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+opt-level = "z"
+panic = "abort"
+
+[package.metadata.deb]
+maintainer = "Your Name <you@example.com>"
+copyright = "2024, Your Name"
+license-file = ["LICENSE", "4"]
+extended-description = """termide is a minimal terminal IDE with a file tree, syntax
+highlighting for common languages and multi-tab editing."""
+section = "devel"
+priority = "optional"
+depends = "$auto"
+assets = [
+    ["target/release/termide", "usr/bin/", "755"],
+    ["README.md", "usr/share/doc/termide/README", "644"],
+]
