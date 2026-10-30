@@ -6,7 +6,7 @@ rust-version = "1.75"
 description = "A minimal terminal IDE written in Rust"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/yourname/termide"
+repository = "https://github.com/liaojinxuan666-eng/termide"
 authors = ["Your Name <you@example.com>"]
 
 [[bin]]
@@ -28,7 +28,7 @@ panic = "abort"
 [package.metadata.deb]
 maintainer = "Your Name <you@example.com>"
 copyright = "2024, Your Name"
-license-file = ["LICENSE", "4"]
+license-file = ["LICENSE.txt", "4"]
 extended-description = """termide is a minimal terminal IDE with a file tree, syntax
 highlighting for common languages and multi-tab editing."""
 section = "devel"
